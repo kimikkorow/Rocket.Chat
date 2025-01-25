@@ -1,15 +1,19 @@
-import { useModal, useCurrentModal } from '@rocket.chat/ui-contexts';
+import { useEffectEvent } from '@rocket.chat/fuselage-hooks';
+import { useCurrentModal, useModal } from '@rocket.chat/ui-contexts';
 import type { ReactElement } from 'react';
-import React, { useCallback } from 'react';
-import { FocusScope } from 'react-aria';
+import { lazy, Suspense } from 'react';
 
-import ModalBackdrop from '../../components/modal/ModalBackdrop';
-import ModalPortal from '../../components/modal/ModalPortal';
+import ModalBackdrop from '../../components/ModalBackdrop';
+import ModalPortal from '../../portals/ModalPortal';
+
+const FocusScope = lazy(() => import('react-aria').then(({ FocusScope }) => ({ default: FocusScope })));
 
 const ModalRegion = (): ReactElement | null => {
 	const currentModal = useCurrentModal();
 	const { setModal } = useModal();
-	const handleDismiss = useCallback(() => setModal(null), [setModal]);
+	const handleDismiss = useEffectEvent(() => {
+		setModal(null);
+	});
 
 	if (!currentModal) {
 		return null;
@@ -17,11 +21,13 @@ const ModalRegion = (): ReactElement | null => {
 
 	return (
 		<ModalPortal>
-			<ModalBackdrop onDismiss={handleDismiss}>
-				<FocusScope contain restoreFocus autoFocus>
-					{currentModal}
-				</FocusScope>
-			</ModalBackdrop>
+			<Suspense fallback={null}>
+				<ModalBackdrop onDismiss={handleDismiss}>
+					<FocusScope contain restoreFocus autoFocus>
+						<Suspense fallback={<div />}>{currentModal}</Suspense>
+					</FocusScope>
+				</ModalBackdrop>
+			</Suspense>
 		</ModalPortal>
 	);
 };

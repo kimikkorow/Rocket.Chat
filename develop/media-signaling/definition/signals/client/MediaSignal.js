@@ -1,5 +1,6 @@
 import { Ajv } from 'ajv';
 import { clientMediaSignalAnswerSchema } from './answer';
+import { clientMediaSignalDTMFSchema } from './dtmf';
 import { clientMediaSignalErrorSchema } from './error';
 import { clientMediaSignalHangupSchema } from './hangup';
 import { clientMediaSignalLocalSDPSchema } from './local-sdp';
@@ -19,6 +20,7 @@ export const clientMediaSignalSchema = {
         clientMediaSignalErrorSchema,
         clientMediaSignalAnswerSchema,
         clientMediaSignalHangupSchema,
+        clientMediaSignalDTMFSchema,
         clientMediaSignalRequestCallSchema,
         clientMediaSignalLocalStateSchema,
         clientMediaSignalRegisterSchema,

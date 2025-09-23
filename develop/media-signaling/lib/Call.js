@@ -462,6 +462,15 @@ export class ClientMediaCall {
             this.mayReportStates = false;
         }
     }
+    sendDTMF(dtmf, duration) {
+        if (!dtmf || !/^[0-9A-D#*,]$/.exec(dtmf)) {
+            throw new Error('Invalid DTMF tone.');
+        }
+        this.config.transporter.sendToServer(this.callId, 'dtmf', {
+            dtmf,
+            duration,
+        });
+    }
     changeState(newState) {
         var _a;
         if (newState === this._state) {
@@ -569,7 +578,7 @@ export class ClientMediaCall {
     }
     processAnswerRequest(signal) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
+            var _a, _b, _c;
             this.pendingAnswerRequest = null;
             if (this.hidden || this.shouldIgnoreWebRTC()) {
                 return;
@@ -594,6 +603,7 @@ export class ClientMediaCall {
                 answer = yield this.webrtcProcessor.createAnswer(signal);
             }
             catch (e) {
+                (_c = this.config.logger) === null || _c === void 0 ? void 0 : _c.error(e);
                 this.sendError({ errorType: 'service', errorCode: 'failed-to-create-answer', negotiationId });
                 throw e;
             }
@@ -802,13 +812,14 @@ export class ClientMediaCall {
         this.stateTimeoutHandlers.clear();
     }
     onWebRTCInternalStateChange(stateName) {
-        var _a;
+        var _a, _b;
         (_a = this.config.logger) === null || _a === void 0 ? void 0 : _a.debug('ClientMediaCall.onWebRTCInternalStateChange');
         if (!this.webrtcProcessor) {
             return;
         }
         const stateValue = this.webrtcProcessor.getInternalState(stateName);
         if (this.serviceStates.get(stateName) !== stateValue) {
+            (_b = this.config.logger) === null || _b === void 0 ? void 0 : _b.debug(stateName, stateValue);
             this.serviceStates.set(stateName, stateValue);
             switch (stateName) {
                 case 'connection':
@@ -819,6 +830,8 @@ export class ClientMediaCall {
         }
     }
     onWebRTCInternalError({ critical, error }) {
+        var _a;
+        (_a = this.config.logger) === null || _a === void 0 ? void 0 : _a.debug('ClientMediaCall.onWebRTCInternalError', critical, error);
         const errorCode = typeof error === 'object' ? error.message : error;
         this.sendError(Object.assign({ errorType: 'service', errorCode }, (this.currentNegotiationId && { negotiationId: this.currentNegotiationId })));
         if (critical) {
@@ -859,9 +872,7 @@ export class ClientMediaCall {
                     }
                     break;
                 case 'disconnected':
-                    if (this.state === 'active') {
-                        this.hangup('service-error');
-                    }
+                    // Disconnected state is temporary, so let's wait for it to change into something else before reacting.
                     break;
             }
         }

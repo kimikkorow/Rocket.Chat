@@ -15,7 +15,7 @@ export type CallState = 'none' | 'ringing' | 'accepted' | 'active' | 'renegotiat
 export type CallHangupReason = 'normal' | 'remote' | 'rejected' | 'unavailable' | 'transfer' | 'timeout' | 'signaling-error' | 'service-error' | 'media-error' | 'error' | 'unknown';
 export type CallAnswer = 'accept' | 'reject' | 'ack' | 'unavailable';
 export type CallNotification = 'accepted' | 'active' | 'hangup';
-export type CallRejectedReason = 'invalid-call-id' | 'invalid-contract-id' | 'existing-call-id' | 'already-requested' | 'unsupported' | 'unavailable' | 'busy';
+export type CallRejectedReason = 'invalid-call-id' | 'invalid-contract-id' | 'existing-call-id' | 'already-requested' | 'unsupported' | 'unavailable' | 'busy' | 'invalid-call-params' | 'forbidden';
 export interface IClientMediaCall {
     callId: string;
     role: CallRole;
@@ -39,5 +39,6 @@ export interface IClientMediaCall {
         type: CallActorType;
         id: string;
     }): void;
+    sendDTMF(dtmf: string, duration?: number): void;
 }
 //# sourceMappingURL=IClientMediaCall.d.ts.map

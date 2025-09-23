@@ -95,6 +95,7 @@ export declare class ClientMediaCall implements IClientMediaCall {
     setHeld(held: boolean): void;
     setContractState(state: 'signed' | 'ignored'): void;
     reportStates(): void;
+    sendDTMF(dtmf: string, duration?: number): void;
     private changeState;
     private updateClientState;
     private maybeStopWebRTC;
